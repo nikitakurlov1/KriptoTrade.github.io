@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Монета</title>
+    <style>
+        :root {
+            --bg-color: #17212b;
+            --text-color: #ffffff;
+            --button-color: #2ea6ff;
+            --secondary-bg: #232f3d;
+            --accent-color: #50a8eb;
+            --success-color: #31b545;
+            --danger-color: #eb5545;
+            --tg-gradient: linear-gradient(135deg, #32B5FF 0%, #0072FF 100%);
+            --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            --card-radius: 16px;
+            --button-radius: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding-bottom: 80px;
+            overflow-x: hidden; /* Убираем горизонтальный скролл */
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            flex: 1;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 10px;
+            left: 20px;
+            background: rgba(35, 47, 61, 0.8);
+            backdrop-filter: blur(10px);
+            color: var(--text-color);
+            padding: 10px 15px;
+            border-radius: var(--button-radius);
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .back-btn:before {
+            content: '←';
+            margin-right: 5px;
+            font-size: 18px;
+        }
+
+        .coin-header {
+            padding: 15px 15px 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .coin-title {
+            text-align: left;
+        }
+        
+        .coin-title h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        
+        .coin-title p {
+            font-size: 18px;
+            margin-bottom: 3px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .coin-details {
+            background: var(--secondary-bg);
+            border-radius: var(--card-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .coin-details:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--tg-gradient);
+        }
+        
+        .coin-details p {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .chart {
+            background: var(--secondary-bg);
+            border-radius: var(--card-radius);
+            padding: 0;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .chart:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--tg-gradient);
+            z-index: 1;
+        }
+        
+        .chart-controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: rgba(35, 47, 61, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .chart-controls .time-frames {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chart-controls .time-frame {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.05);
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .chart-controls .time-frame:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .chart-controls .time-frame.active {
+            background: var(--tg-gradient);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 114, 255, 0.4);
+        }
+        
+        .chart-indicators {
+            display: flex;
+            align-items: center;
+        }
+        
+        .chart-indicator {
+            font-size: 14px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .chart-indicator.positive {
+            background: rgba(49, 181, 69, 0.15);
+            border-color: rgba(49, 181, 69, 0.3);
+            color: var(--success-color);
+        }
+        
+        .chart-indicator.negative {
+            background: rgba(235, 85, 69, 0.15);
+            border-color: rgba(235, 85, 69, 0.3);
+            color: var(--danger-color);
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .balance {
+            background: var(--secondary-bg);
+            border-radius: var(--card-radius);
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--success-color);
+        }
+
+        .balance p {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .balance-amount {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 10px 0;
+            background: var(--tg-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 20px;
+            background: var(--secondary-bg);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .action-btn {
+            flex: 1;
+            margin: 0 8px;
+            padding: 12px;
+            border-radius: var(--button-radius);
+            background: var(--tg-gradient);
+            color: var(--text-color);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(0, 114, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 114, 255, 0.4);
+        }
+        
+        .action-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 6px rgba(0, 114, 255, 0.4);
+        }
+        
+        .action-btn.buy {
+            background: var(--success-color);
+            box-shadow: 0 4px 8px rgba(49, 181, 69, 0.3);
+        }
+        
+        .action-btn.buy:hover {
+            box-shadow: 0 6px 12px rgba(49, 181, 69, 0.4);
+        }
+        
+        .action-btn.sell {
+            background: var(--danger-color);
+            box-shadow: 0 4px 8px rgba(235, 85, 69, 0.3);
+        }
+        
+        .action-btn.sell:hover {
+            box-shadow: 0 6px 12px rgba(235, 85, 69, 0.4);
+        }
+        
+        .favorite-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: var(--secondary-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: var(--button-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+        
+        .favorite-btn.active {
+            background: rgba(46, 166, 255, 0.15);
+            border-color: rgba(46, 166, 255, 0.3);
+            color: var(--accent-color);
+        }
+        
+        .favorite-btn.active svg path {
+            fill: var(--accent-color);
+        }
+        
+        .favorite-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .favorite-btn span {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        iframe {
+            width: 100%;
+            height: 350px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <a href="trade.html" class="back-btn">Назад</a>
+    <div class="container">
+        <div class="chart">
+            <div class="coin-header">
+                <div class="coin-title">
+                    <h1 id="coinName">Монета</h1>
+                    <p id="coinPrice">Цена: 0.00 ₽</p>
+                    <p id="coinChange" style="color: var(--success-color);">+0.00% за 24ч</p>
+                </div>
+                <button id="favoriteBtn" class="favorite-btn" onclick="toggleFavorite()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>В избранное</span>
+                </button>
+            </div>
+            <div class="chart-controls">
+                <div class="time-frames">
+                    <div class="time-frame active" onclick="changeTimeframe('D')">1Д</div>
+                    <div class="time-frame" onclick="changeTimeframe('W')">1Н</div>
+                    <div class="time-frame" onclick="changeTimeframe('M')">1М</div>
+                    <div class="time-frame" onclick="changeTimeframe('3M')">3М</div>
+                </div>
+                <div class="chart-indicators">
+                    <div class="chart-indicator" id="priceIndicator">$0.00</div>
+                </div>
+            </div>
+            <div class="chart-loading">
+                <div class="spinner"></div>
+            </div>
+            <iframe id="chartFrame" allowfullscreen></iframe>
+        </div>
+        
+        <div class="coin-details">
+            <p id="coinMarketCap" style="color: rgba(255,255,255,0.7);">Капитализация: 0 ₽</p>
+            <p id="coinVolume" style="color: rgba(255,255,255,0.7);">Объем (24ч): 0 ₽</p>
+            <p id="lastUpdate" style="font-size: 12px; margin-top: 10px; color: rgba(255,255,255,0.5);">Последнее обновление: только что</p>
+        </div>
+
+        <!-- Блок с балансом удален по требованию пользователя -->
+    </div>
+
+    <div class="actions">
+        <div class="action-btn" onclick="goToStaking()" style="width: 100%;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 6px;">
+                <path d="M12 4V8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M12 16V20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M6 8L6 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M18 8L18 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M6 12H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Стейкинг
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+        let currentCoin = '';
+        let currentInterval = 'D';
+        let currentPrice = 0;
+        let isFavorite = false;
+        
+        // Функция для перехода на страницу стейкинга
+        function goToStaking() {
+            window.location.href = `staking.html?coin=${currentCoin}`;
+        }
+
+        async function loadCoinInfo(coinId) {
+            try {
+                const coin = await API.getCoin(coinId);
+                if (!coin) {
+                    throw new Error('Монета не найдена');
+                }
+                document.getElementById('coinName').textContent = coin.name;
+                document.getElementById('coinPrice').textContent = `Цена: ${coin.price.toLocaleString()} ₽`;
+                document.getElementById('coinChange').textContent = `${coin.priceChange24h > 0 ? '+' : ''}${coin.priceChange24h}% за 24ч`;
+                document.getElementById('coinChange').style.color = coin.priceChange24h >= 0 ? 'var(--success-color)' : 'var(--danger-color)';
+                document.getElementById('coinMarketCap').textContent = `Капитализация: ${formatLargeNumber(coin.marketCap)} ₽`;
+                document.getElementById('coinVolume').textContent = `Объем (24ч): ${formatLargeNumber(coin.volume24h)} ₽`;
+                document.getElementById('lastUpdate').textContent = `Последнее обновление: ${formatDate(new Date(API.getLastUpdateTime()))}`;
+                loadChart(coinId, currentInterval);
+            } catch (error) {
+                console.error('Ошибка при загрузке информации о монете:', error);
+                alert('Ошибка при загрузке информации о монете. Проверьте подключение к интернету или выберите другую монету.');
+                window.location.href = 'trade.html';
+            }
+        }
+
+        // Форматирование больших чисел (миллионы, миллиарды)
+        function formatLargeNumber(num) {
+            if (num >= 1000000000) {
+                return (num / 1000000000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' млрд';
+            } else if (num >= 1000000) {
+                return (num / 1000000).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' млн';
+            } else {
+                return num.toLocaleString();
+            }
+        }
+        
+        // Форматирование даты
+        function formatDate(date) {
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000); // разница в секундах
+            
+            if (diff < 60) {
+                return 'только что';
+            } else if (diff < 3600) {
+                return `${Math.floor(diff / 60)} мин. назад`;
+            } else if (diff < 86400) {
+                return `${Math.floor(diff / 3600)} ч. назад`;
+            } else {
+                return date.toLocaleString();
+            }
+        }
+        
+        // Проверка статуса избранного
+        async function checkFavoriteStatus(symbol) {
+            try {
+                const userData = await API.getUserInfo();
+                isFavorite = userData.favorites && userData.favorites.includes(symbol);
+                updateFavoriteButton();
+            } catch (error) {
+                console.error('Ошибка при проверке статуса избранного:', error);
+            }
+        }
+        
+        // Обновление кнопки избранного
+        function updateFavoriteButton() {
+            const favoriteBtn = document.getElementById('favoriteBtn');
+            if (isFavorite) {
+                favoriteBtn.classList.add('active');
+                favoriteBtn.querySelector('span').textContent = 'В избранном';
+            } else {
+                favoriteBtn.classList.remove('active');
+                favoriteBtn.querySelector('span').textContent = 'В избранное';
+            }
+        }
+        
+        // Переключение статуса избранного
+        async function toggleFavorite() {
+            try {
+                const symbol = currentCoin;
+                if (isFavorite) {
+                    await API.removeFromFavorites(symbol);
+                    isFavorite = false;
+                } else {
+                    await API.addToFavorites(symbol);
+                    isFavorite = true;
+                }
+                updateFavoriteButton();
+            } catch (error) {
+                console.error('Ошибка при изменении статуса избранного:', error);
+                alert('Ошибка при изменении статуса избранного');
+            }
+        }
+        
+        function loadChart(coinId, interval) {
+            const chartFrame = document.getElementById('chartFrame');
+            chartFrame.src = `https://s.tradingview.com/widgetembed/?symbol=${coinId}USD&interval=${interval}&theme=dark&style=1&timezone=Etc/UTC`;
+        }
+        
+        function changeTimeframe(interval) {
+            currentInterval = interval;
+            loadChart(currentCoin, interval);
+            
+            // Обновляем активный класс для кнопок временных интервалов
+            document.querySelectorAll('.time-frame').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Находим кнопку с соответствующим интервалом и добавляем ей класс active
+            const activeBtn = Array.from(document.querySelectorAll('.time-frame')).find(
+                btn => btn.textContent.includes(intervalToText(interval))
+            );
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+        
+        function intervalToText(interval) {
+            switch(interval) {
+                case 'D': return '1Д';
+                case 'W': return '1Н';
+                case 'M': return '1М';
+                case '3M': return '3М';
+                default: return interval;
+            }
+        }
+        
+        function updatePriceIndicator(price) {
+            const indicator = document.getElementById('priceIndicator');
+            indicator.textContent = `${price} ₽`;
+            
+            // Добавляем класс в зависимости от изменения цены
+            const randomChange = Math.random() > 0.5;
+            indicator.classList.remove('positive', 'negative');
+            indicator.classList.add(randomChange ? 'positive' : 'negative');
+            
+            // Добавляем анимацию пульсации
+            indicator.style.animation = 'none';
+            setTimeout(() => {
+                indicator.style.animation = 'pulse 0.5s ease';
+            }, 10);
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentCoin = urlParams.get('coin');
+
+            if (currentCoin) {
+                await loadCoinInfo(currentCoin);
+                
+                // Запускаем автоматическое обновление цены каждые 30 секунд
+                setInterval(async () => {
+                    await loadCoinInfo(currentCoin);
+                }, 30000);
+            } else {
+                alert('Не указана монета');
+                window.location.href = 'trade.html';
+            }
+        });
+
+        async function buyCoin() {
+            const amount = parseFloat(prompt('Введите количество монет:'));
+            if (amount && amount > 0) {
+                try {
+                    await API.trade(currentCoin, amount, 'buy');
+                    await loadCoinInfo(currentCoin);
+                } catch (error) {
+                    alert('Ошибка при покупке');
+                }
+            }
+        }
+
+        async function sellCoin() {
+            const amount = parseFloat(prompt('Введите количество монет:'));
+            if (amount && amount > 0) {
+                try {
+                    await API.trade(currentCoin, amount, 'sell');
+                    await loadCoinInfo(currentCoin);
+                } catch (error) {
+                    alert('Ошибка при продаже');
+                }
+            }
+        }
+        
+        function goToStaking() {
+            window.location.href = `staking.html?coin=${currentCoin}`;
+        }
+    </script>
+</body>
+</html>
